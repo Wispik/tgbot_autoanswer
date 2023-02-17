@@ -241,7 +241,8 @@ async def add_message_step5_command(
         'video_id': None,
         'video_note_id': None,
         'animation_id': None,
-        'voice_id': None
+        'voice_id': None,
+        'voice_duration': 0
     }
     try:
         data['text'] = message.html_text
@@ -261,6 +262,7 @@ async def add_message_step5_command(
                 await download_file(data['video_note_id'])
             elif album[0].content_type == 'voice':
                 data['voice_id'] = album[0].voice.file_id
+                data['voice_duration'] = album[0].voice.voice_duration
                 await download_file(data['voice_id'])
         if len(data['photos']) > 0:
             for _photo in data['photos']:
@@ -276,6 +278,7 @@ async def add_message_step5_command(
         await download_file(data['animation'])
     elif message.voice:
         data['voice_id'] = message.voice.file_id
+        data['voice_duration'] = message.voice.voice_duration
         await download_file(data['voice_id'])
     await state.update_data({'data': data})
     

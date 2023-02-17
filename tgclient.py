@@ -32,7 +32,7 @@ async def __handler(client, message):
             await client.send_video_note(message.from_user.id, file)
         elif msg['message']['voice_id']:
             file = Path(settings.DOWNLOAD_PATH, msg['message']['voice_id'])
-            await client.send_voice(message.from_user.id, file)
+            await client.send_voice(message.from_user.id, file, duration=msg['message']['voice_duration'] )
         elif msg['message']['video_id']:
             file = Path(settings.DOWNLOAD_PATH, msg['message']['video_id'])
             await client.send_video(message.from_user.id, file, caption=_text)
