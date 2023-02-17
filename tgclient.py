@@ -17,6 +17,11 @@ async def __handler(client, message):
     if message.from_user.id in acc['users']:
         return
     await db.add_user_to_account(acc['account_id'], message.from_user.id)
+    count_chat_history = 0
+    async for _ in client.get_chat_history(chat_id=message.from_user.id, limit=2):
+        count_chat_history += 1
+    if count_chat_history > 1:
+        return
     for msg in messages:
         await asyncio.sleep(msg['delay'])
             

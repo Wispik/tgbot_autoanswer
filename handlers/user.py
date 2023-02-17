@@ -20,8 +20,11 @@ clients_dicts = {}
 
 async def start_command(
     message: types.Message,
-    state: FSMContext
+    state: FSMContext,
+    is_admin: bool
 ):
+    if not is_admin:
+        return
     await state.reset_data()
     await state.reset_state()
     await message.answer('Выберите действие:', reply_markup=kb.kb_main)
@@ -29,16 +32,23 @@ async def start_command(
 
 async def add_account_step1_command(
     message: types.Message,
-    state: FSMContext
+    state: FSMContext,
+    is_admin: bool
 ):
+    if not is_admin:
+        return
     await state.set_state(AppState.STATE_WAIT_PROXY)
     await message.answer('Введите Proxy SOCKS5 в формате: ip:port:login:password.')
 
 
 async def add_account_step2_command(
     message: types.Message,
-    state: FSMContext
+    state: FSMContext,
+    is_admin: bool
 ):
+    if not is_admin:
+        return
+
     _proxy_data = message.text.split(':')
 
     _proxy_dict = dict(
@@ -60,8 +70,12 @@ async def add_account_step2_command(
 
 async def add_account_step3_command(
     message: types.Message,
-    state: FSMContext
+    state: FSMContext,
+    is_admin: bool
 ):
+    if not is_admin:
+        return
+
     state_data = await state.get_data()
 
     acc_in_db = await db.get_account_by_phone(message.text)
@@ -104,8 +118,12 @@ async def add_account_step3_command(
 
 async def add_account_step4_command(
     message: types.Message,
-    state: FSMContext
+    state: FSMContext,
+    is_admin: bool
 ):
+    if not is_admin:
+        return
+
     await state.update_data({'code': message.text})
     await state.set_state(AppState.STATE_WAIT_2FA)
     await message.answer('Введите пароль 2FA (Если пароль отсутствует введите 0)')
@@ -113,8 +131,12 @@ async def add_account_step4_command(
 
 async def add_account_step5_command(
     message: types.Message,
-    state: FSMContext
+    state: FSMContext,
+    is_admin: bool
 ):
+    if not is_admin:
+        return
+
     try:
         state_date = await state.get_data()
         client = clients_dicts[message.from_id]
@@ -151,16 +173,24 @@ async def add_account_step5_command(
 
 async def add_message_step1_command(
     message: types.Message,
-    state: FSMContext
+    state: FSMContext,
+    is_admin: bool
 ):
+    if not is_admin:
+        return
+
     await state.set_state(AppState.STATE_WAIT_ACCOUNT_ID)
     await message.answer('Введите ID аккаунта для добавления/редактирования сообщения.')
 
 
 async def add_message_step2_command(
     message: types.Message,
-    state: FSMContext
+    state: FSMContext,
+    is_admin: bool
 ):
+    if not is_admin:
+        return
+
     acc = await db.get_account_by_id(message.text)
     if acc:
         await state.set_state(AppState.STATE_WAIT_MESSAGE_ID)
@@ -172,8 +202,12 @@ async def add_message_step2_command(
 
 async def add_message_step3_command(
     message: types.Message,
-    state: FSMContext
+    state: FSMContext,
+    is_admin: bool
 ):
+    if not is_admin:
+        return
+
     await state.set_state(AppState.STATE_WAIT_DELAY)
     await state.update_data({'message_id': message.text})
     await message.answer('Введите задержку перед отправкой в секундах')
@@ -181,8 +215,12 @@ async def add_message_step3_command(
 
 async def add_message_step4_command(
     message: types.Message,
-    state: FSMContext
+    state: FSMContext,
+    is_admin: bool
 ):
+    if not is_admin:
+        return
+
     await state.set_state(AppState.STATE_WAIT_MESSAGE)
     await state.update_data({'delay': int(message.text)})
     await message.answer('Введите сообщение')
@@ -191,8 +229,12 @@ async def add_message_step4_command(
 async def add_message_step5_command(
     message: types.Message,
     state: FSMContext,
+    is_admin: bool,
     album: Optional[List[types.Message]] = None
 ):
+    if not is_admin:
+        return
+
     data = {
         'text': '',
         'photos': [],

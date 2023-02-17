@@ -1,4 +1,4 @@
-from settings import db_connection, COLLECTION_ACCOUNTS, COLLECTION_MESSAGES
+from settings import db_connection, COLLECTION_ACCOUNTS, COLLECTION_MESSAGES, COLLECTION_ADMIN
 
 import pymongo
 
@@ -20,6 +20,11 @@ async def create_account(phone: str, tg_id: int, proxy: dict) -> int:
         }
     )
     return acc_id
+
+
+async def get_admin_by_tg_id(tg_id: int):
+    col = db_connection[COLLECTION_ADMIN]
+    return await col.find_one(filter={'tg_id': tg_id})
 
 
 async def get_all_accounts():

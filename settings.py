@@ -32,6 +32,7 @@ DOWNLOAD_PATH = Path(os.getcwd(), 'files')
 if not os.path.exists(DOWNLOAD_PATH):
     os.makedirs(DOWNLOAD_PATH)
 
+COLLECTION_ADMIN = 'admins'
 COLLECTION_ACCOUNTS = 'accounts'
 COLLECTION_MESSAGES = 'messages'
 
