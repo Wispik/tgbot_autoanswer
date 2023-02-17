@@ -16,6 +16,7 @@ async def __handler(client, message):
     messages = await db.get_account_messages(acc['account_id'])
     if message.from_user.id in acc['users']:
         return
+    await db.add_user_to_account(acc['account_id'], message.from_user.id)
     for msg in messages:
         await asyncio.sleep(msg['delay'])
             
@@ -49,9 +50,6 @@ async def __handler(client, message):
                 await client.send_media_group(message.from_user.id, mg)
         else:
             await client.send_message(message.from_user.id, msg['message']['text'])
-
-
-    await db.add_user_to_account(acc['account_id'], message.from_user.id)
 
 
 async def run(phone):
