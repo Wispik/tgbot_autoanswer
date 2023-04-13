@@ -263,7 +263,7 @@ async def add_message_step5_command(
             elif album[0].content_type == 'voice':
                 data['voice_id'] = album[0].voice.file_id
                 data['voice_duration'] = album[0].voice.duration
-                await download_file(data['voice_id'])
+                await download_file(data['voice_id'], voice=True)
         if len(data['photos']) > 0:
             for _photo in data['photos']:
                 await download_file(_photo)
@@ -279,7 +279,7 @@ async def add_message_step5_command(
     elif message.voice:
         data['voice_id'] = message.voice.file_id
         data['voice_duration'] = message.voice.duration
-        await download_file(data['voice_id'])
+        await download_file(data['voice_id'], voice=True)
     await state.update_data({'data': data})
     
     state_data = await state.get_data()
@@ -294,6 +294,3 @@ async def add_message_step5_command(
     await state.reset_state()
 
     await message.answer(f"Сообщение {state_data['message_id']} успешно добавлено")
-
-
-        
