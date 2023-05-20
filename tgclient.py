@@ -5,6 +5,7 @@ from pyrogram import Client, idle
 from pyrogram.handlers import MessageHandler
 from pyrogram.types import InputMediaPhoto
 from pyrogram.enums import ParseMode
+from pyrogram.errors import FloodWait
 
 import db.database as db
 import settings
@@ -25,36 +26,49 @@ async def __handler(client, message):
     for msg in messages:
         await asyncio.sleep(msg['delay'])
 
-        _text = msg['message']['text'] if msg['message']['text'] else None
+        while True:
 
-        if msg['message']['video_note_id']:
-            file = Path(settings.DOWNLOAD_PATH, msg['message']['video_note_id'])
-            await client.send_video_note(message.from_user.id, file)
-        elif msg['message']['voice_id']:
-            file = Path(settings.DOWNLOAD_PATH, msg['message']['voice_id'] + '.ogg')
-            await client.send_voice(message.from_user.id, file, duration=msg['message']['voice_duration'] )
-        elif msg['message']['video_id']:
-            file = Path(settings.DOWNLOAD_PATH, msg['message']['video_id'])
-            await client.send_video(message.from_user.id, file, caption=_text)
-        elif msg['message']['animation_id']:
-            file = Path(settings.DOWNLOAD_PATH, msg['message']['animation_id'])
-            await client.send_animation(message.from_user.id, file, caption=_text)
-        elif msg['message']['photos']:
-            if len(msg['message']['photos']) == 1:
-                file = Path(settings.DOWNLOAD_PATH, msg['message']['photos'][0])
-                await client.send_photo(message.from_user.id, photo=file, caption=_text)
-            else:
-                mg = []
-                for i, _p in enumerate(msg['message']['photos']):
-                    if i == 0 and msg['message']['text']:
-                        file = Path(settings.DOWNLOAD_PATH, _p)
-                        mg.append(InputMediaPhoto(file, caption=_text))
+            try:
+
+                _text = msg['message']['text'] if msg['message']['text'] else None
+
+                if msg['message']['video_note_id']:
+                    file = Path(settings.DOWNLOAD_PATH, msg['message']['video_note_id'])
+                    await client.send_video_note(message.from_user.id, file)
+                elif msg['message']['voice_id']:
+                    file = Path(settings.DOWNLOAD_PATH, msg['message']['voice_id'] + '.ogg')
+                    await client.send_voice(message.from_user.id, file, duration=msg['message']['voice_duration'] )
+                elif msg['message']['video_id']:
+                    file = Path(settings.DOWNLOAD_PATH, msg['message']['video_id'])
+                    await client.send_video(message.from_user.id, file, caption=_text)
+                elif msg['message']['animation_id']:
+                    file = Path(settings.DOWNLOAD_PATH, msg['message']['animation_id'])
+                    await client.send_animation(message.from_user.id, file, caption=_text)
+                elif msg['message']['photos']:
+                    if len(msg['message']['photos']) == 1:
+                        file = Path(settings.DOWNLOAD_PATH, msg['message']['photos'][0])
+                        await client.send_photo(message.from_user.id, photo=file, caption=_text)
                     else:
-                        file = Path(settings.DOWNLOAD_PATH, _p)
-                        mg.append(InputMediaPhoto(file))
-                await client.send_media_group(message.from_user.id, mg)
-        else:
-            await client.send_message(message.from_user.id, msg['message']['text'])
+                        mg = []
+                        for i, _p in enumerate(msg['message']['photos']):
+                            if i == 0 and msg['message']['text']:
+                                file = Path(settings.DOWNLOAD_PATH, _p)
+                                mg.append(InputMediaPhoto(file, caption=_text))
+                            else:
+                                file = Path(settings.DOWNLOAD_PATH, _p)
+                                mg.append(InputMediaPhoto(file))
+                        await client.send_media_group(message.from_user.id, mg)
+                else:
+                    await client.send_message(message.from_user.id, msg['message']['text'])
+                
+                break
+
+            except FloodWait as e:
+                await asyncio.sleep(e.value)
+            except Exception as e:
+                print(e)
+                break
+            
 
 
 async def run(phone):
